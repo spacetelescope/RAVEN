@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_celery_results',
+    # 'django_celery_results',
     'raven.ingest',
     'raven.fetch',
     'raven.archive',

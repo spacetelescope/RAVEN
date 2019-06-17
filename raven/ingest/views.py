@@ -16,12 +16,12 @@ from rest_framework import status
 # from celery.result import AsyncResult
 # from celery import group
 
-from config.celery import app
+# from config.celery import app
 
-from kombu import Connection
-from kombu import Queue
+# from kombu import Connection
+# from kombu import Queue
 
-from celery.schedules import schedule as celery_ingest_schedule
+# from celery.schedules import schedule as celery_ingest_schedule
 
 from jeta.archive.controller import Utilities
 from jeta.ingest.controller import execute

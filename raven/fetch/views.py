@@ -3,14 +3,21 @@ import numpy
 
 from datetime import datetime
 
-from jeta.archive import fetch
-from astropy.time import Time
-
 from django.http import HttpResponse
 
 from django.shortcuts import render
 from django.views.generic import View
 from django.views.generic import TemplateView
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+from jeta.archive import fetch
+
+
+from astropy.time import Time
+
 
 class FetchMnemonicDateRange(View):
 
@@ -23,11 +30,12 @@ class FetchMnemonicDateRange(View):
 
         return HttpResponse(json.dumps({'date_range': date_range}), content_type='application/json')
 
+
 class TestMnemonicData(View):
 
     def get(self, request):
 
-        mnemonic = request.GET.get('mnemonic').replace(' ', '')
+        mnemonic = request.GET.get('mnemonic').replace(' ', '').upper()
         start_of_doy_range = request.GET.get('start_of_doy_range', '2019:001')
         end_of_doy_range = request.GET.get('end_of_doy_range', '2019:365')
 
@@ -54,7 +62,7 @@ class TestMnemonicData(View):
 
         telemetry = [
             {
-                'level': 1,
+                'levelOfDetail': 1,
                 'mnemonic': mnemonic,
                 'minValue': min(data.vals),
                 'maxValue': max(data.vals),
@@ -62,10 +70,13 @@ class TestMnemonicData(View):
                 'endTime': times[-1],
                 'x': times,
                 'y': values,
-                'type': 'scatter',
+                'type': 'scattergl',
                 'mode': 'lines+markers',
-                'line': {'shape': 'hv'},
-                'showlegend': True
+                'line': {
+                    'shape': 'hv',
+                    'color': 'rgb(0, 50, 250)'
+                },
+                'showlegend': True,
             }
         ]
 
@@ -77,3 +88,24 @@ class FetchTemplateView(TemplateView):
     def get(self, request):
 
         return render(request, 'fetch/index.html', {})
+
+
+class MnemonicStatisticsView(APIView):
+
+    def get(self, request, format='json'):
+
+        mnemonic = request.GET.get('mnemonic', None)
+        interval = request.GET.get('interval', '5min')
+
+        try:
+            stats, group = fetch.read_stats_file(mnemonic, interval)
+
+        except Exception as err:
+
+            return HttpResponse(json.dumps({'message': err.args[0]}),
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            content_type='application/json')
+
+        return HttpResponse(json.dumps({'stats': stats}),
+                        status=status.HTTP_200_OK,
+                        content_type='application/json')

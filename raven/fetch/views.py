@@ -19,14 +19,21 @@ from jeta.archive import fetch
 from astropy.time import Time
 
 
-class FetchMnemonicDateRange(View):
+class FetchMnemonicDateRange(APIView):
 
-    def get(self, request):
+    def get(self, request, format='json'):
 
         mnemonic = request.GET.get('mnemonic').replace(' ', '')
         date_format = request.GET.get('dateFormat', 'iso')
 
-        date_range = fetch.get_time_range(mnemonic, date_format)
+        try:
+            date_range = fetch.get_time_range(mnemonic, date_format)
+
+        except Exception as err:
+            return HttpResponse(json.dumps({'error': err.args[0]}),
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            content_type='application/json')
+
 
         return HttpResponse(json.dumps({'date_range': date_range}), content_type='application/json')
 

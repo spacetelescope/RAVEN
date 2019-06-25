@@ -21,7 +21,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^ingest/', include('raven.ingest.urls', namespace='ingest')),
     url(r'^fetch/', include('raven.fetch.urls', namespace='fetch')),
-    url(r'^archive/', include('raven.archive.urls', namespace='archive'))
+    url(r'^archive/', include('raven.archive.urls', namespace='archive')),
+    url(r'api/v1/', include('raven.core.apiv1_urls', namespace='apiv1'))
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

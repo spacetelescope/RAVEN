@@ -34,12 +34,11 @@ def get_env_variable(var_name):
 SECRET_KEY = get_env_variable('RAVEN_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -145,6 +144,5 @@ STATICFILES_FINDERS = (
 
 STATICFILES_DIRS = (
     BASE_DIR.parent.child("assets"),
-    "tia/assets",
+    "raven/assets",
 )
-

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Raven’s Documentation &mdash; Raven 1.0.0 documentation</title>
+  <title>Raven &mdash; Raven 1.0.0 documentation</title>
   
 
   
@@ -27,7 +27,8 @@
   <link rel="stylesheet" href="_static/stsci.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Fetch API Class Index" href="fetch.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -75,12 +76,11 @@
               
             
             
-              <!-- Local TOC -->
-              <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Raven’s Documentation</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="fetch.html">Fetch API Class Index</a></li>
 </ul>
-</div>
+
             
           
         </div>
@@ -124,7 +124,7 @@
     
       <li><a href="#">Docs</a> &raquo;</li>
         
-      <li>Raven’s Documentation</li>
+      <li>Raven</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -143,21 +143,28 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <dl class="class">
-<dt id="raven.fetch.views.TestMnemonicData">
-<em class="property">class </em><code class="descclassname">raven.fetch.views.</code><code class="descname">TestMnemonicData</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#raven.fetch.views.TestMnemonicData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">django.views.generic.base.View</span></code></p>
-<dl class="method">
-<dt id="raven.fetch.views.TestMnemonicData.get">
-<code class="descname">get</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="headerlink" href="#raven.fetch.views.TestMnemonicData.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get Method</p>
-</dd></dl>
-
-</dd></dl>
-
-<div class="section" id="raven-s-documentation">
-<h1>Raven’s Documentation<a class="headerlink" href="#raven-s-documentation" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="raven">
+<h1>Raven<a class="headerlink" href="#raven" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The purpose of RAVEN is to act as an intermediary interface between a client and the telemetry archive. In this context a client can be either
+an individual who desires structured telemetry or a higher-level application. Raven is a DRF-Based RESTful (<a class="reference external" href="https://www.django-rest-framework.org/">https://www.django-rest-framework.org/</a>)
+service. The API was built using the lower-level <a class="reference external" href="https://pljwkadi.stsci.edu/">jSka.jeta</a> module of the <a class="reference external" href="https://pljwkadi.stsci.edu/">jSka</a> package.
+<a class="reference external" href="https://pljwkadi.stsci.edu/">jSka.jeta</a> is derived from the eng_archive of the <a class="reference external" href="http://cxc.cfa.harvard.edu/mta/ASPECT/tool_doc/pydocs/">Ska</a> package provided by the Chandra Spacecraft team
+and includes similar capabilities for JWST. If lower level data analysis is required then users may use the command-line
+tools provided in the <a class="reference external" href="https://pljwkadi.stsci.edu/">jSka</a> environment.</p>
+</div>
+<div class="section" id="example-call">
+<h2>Example Call<a class="headerlink" href="#example-call" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ curl https://localhost:1234/api/v1/fetch?mnemonic<span class="o">=</span>MNEMONIC
+</pre></div>
+</div>
 <div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="fetch.html">Fetch API Class Index</a></li>
+</ul>
+</div>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -174,6 +181,13 @@
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="fetch.html" class="btn btn-neutral float-right" title="Fetch API Class Index" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
   
 
   <hr/>

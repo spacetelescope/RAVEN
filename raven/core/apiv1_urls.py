@@ -1,6 +1,13 @@
 from django.conf.urls import url, include
 
 from raven.fetch.api.v1 import views as fetch_views
+from raven.core.api.v1 import views as core_views
+
+api_version = {
+    'MAJOR_VERSION': 1,
+    'MINOR_VERSION': 0,
+    'PATCH_VERSION': 0,
+}
 
 urlpatterns = [
     url(
@@ -22,6 +29,11 @@ urlpatterns = [
         regex='fetch',
         view=fetch_views.FetchEngineeringTelemetryAPIView.as_view(),
         name='fetch'
+    ),
+    url(
+        regex='info',
+        view=core_views.InfoAPIView.as_view(),
+        name='info'
     ),
 
 ]

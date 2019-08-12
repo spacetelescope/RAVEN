@@ -177,7 +177,7 @@ class FetchPlotDataAPIView(APIView):
         plot_data[0]['mode'] = 'lines+markers'
         plot_data[0]['line'] = {
                     'shape': 'hv',
-                    'color': 'rgb(0, 50, 250)'
+                    'color': 'rgb(30, 110, 162)'
                 }
         plot_data[0]['showlegend'] = True
 
@@ -199,6 +199,13 @@ class MnemonicStatisticsView(APIView):
 
         try:
             stats, group = fetch.read_stats_file(mnemonic, interval)
+            try:
+                for idx, stat in enumerate(stats):
+                    tmp = list(stat)
+                    tmp[0] = Time((tmp[0] * 328), format='unix').iso
+                    stats[idx] = tuple(tmp)
+            except Exception as err:
+                print(err.args[0])
 
         except Exception as err:
 

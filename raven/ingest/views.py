@@ -35,7 +35,7 @@ class UpdateIngestSchedule(APIView):
     def post(self, request, format=None):
 
         response = set_ingest_schedule(celery_ingest_schedule(run_every=60))
-        print(response)
+
         content = {'response': response}
         return Response(json.dumps(content),
                         status=status.HTTP_200_OK,
@@ -88,11 +88,16 @@ class ExecuteIngestView(APIView):
 
     def post(self, request, format=None):
 
-        # Disable automatic ingest enabled first
+        try:
+            Utilities.prepare_archive_on_disk()
+            content = execute()
+        except Exception as err:
+            return HttpResponse(
+                json.dumps(err.args[0]),
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content_type='application/json')
 
-        Utilities.prepare_archive_on_disk()
-        content = execute()
-
-        return Response(json.dumps(content),
-                        status=status.HTTP_200_OK,
-                        content_type='application/json')
+        return HttpResponse(
+            json.dumps(content),
+            status=status.HTTP_200_OK,
+            content_type='application/json')

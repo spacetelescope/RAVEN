@@ -101,17 +101,17 @@ class FetchEngineeringTelemetryAPIView(APIView):
         """
 
         tomorrow = datetime.datetime.now() + timedelta(days=1)
+        default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
+
         mnemonic = request.GET.get('mnemonic').replace(' ', '').upper()
 
-        default_end_doy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}"
-
-        start_of_doy_range = request.GET.get('start_doy', '2010:001')
-        end_of_doy_range = request.GET.get(
-            'end_doy',
-            default_end_doy)
+        start_of_ydoy = request.GET.get('start_of_ydoy')
+        end_of_ydoy = request.GET.get(
+            'end_of_ydoy',
+            default_end_ydoy)
 
         try:
-            data = fetch.Msid(mnemonic, start_of_doy_range, end_of_doy_range)
+            data = fetch.Msid(mnemonic, start_of_ydoy, end_of_ydoy)
             times = Time(data.times, format="unix", scale='utc').iso.tolist()
             values = data.vals.tolist()
             telemetry = [
@@ -161,10 +161,21 @@ class FetchPlotDataAPIView(APIView):
 
         fetch_url = request.build_absolute_uri(reverse('apiv1:fetch'))
 
+        tomorrow = datetime.datetime.now() + timedelta(days=1)
+        default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
+
         mnemonic = request.GET.get('mnemonic', None)
+        start_of_ydoy = request.GET.get('start_of_range')
+        end_of_ydoy = request.GET.get(
+            'end_of_range',
+            default_end_ydoy)
 
         try:
-            response = requests.get(fetch_url, params={'mnemonic': mnemonic})
+            response = requests.get(fetch_url, params={
+                'mnemonic': mnemonic,
+                'start_of_ydoy': start_of_ydoy,
+                'end_of_ydoy': end_of_ydoy
+                })
 
         except Exception as err:
             return HttpResponse(

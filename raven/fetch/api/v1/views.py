@@ -16,6 +16,8 @@ from astropy.time import Time
 
 from jeta.archive import fetch
 
+from raven.core.util import provide_default_date_range
+
 
 class FetchMnemonicDateRangeAPIView(APIView):
 
@@ -69,6 +71,43 @@ class FetchEngineeringTelemetryAPIView(APIView):
         NOTE: View only implements the HTTP GET method. All other calls should return 405.
     """
 
+    def validate_input_date_range(self, request):
+
+        tomorrow = datetime.datetime.now() + timedelta(days=1)
+        default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
+
+        start_of_ydoy = request.GET.get('start_of_ydoy')
+        end_of_ydoy = request.GET.get('end_of_ydoy', '')
+
+        if end_of_ydoy == '':
+            end_of_ydoy = default_end_ydoy
+
+        return start_of_ydoy, end_of_ydoy
+
+    def validate_fetched_times(self, times):
+
+        self.start_time = ''
+        self.end_time = ''
+
+        iso_times = []
+
+        if len(times) != 0:
+            iso_times = Time(times, format="unix", scale='utc').iso.tolist()
+            self.start_time = iso_times[0]
+            self.end_time = iso_times[-1]
+
+        return iso_times
+
+    def validate_fetched_values(self, values):
+
+        min_value = None
+        max_value = None
+
+        if len(values) != 0:
+            min_value = values.min(),
+            max_value = values.max(),
+        return [min_value, max_value]
+
     def zoom(self, request, data):
 
         """ APIView to handling zooming in on plots.
@@ -100,28 +139,24 @@ class FetchEngineeringTelemetryAPIView(APIView):
                 with a string value set to the error message for the exception.
         """
 
-        tomorrow = datetime.datetime.now() + timedelta(days=1)
-        default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
-
         mnemonic = request.GET.get('mnemonic').replace(' ', '').upper()
 
-        start_of_ydoy = request.GET.get('start_of_ydoy')
-        end_of_ydoy = request.GET.get(
-            'end_of_ydoy',
-            default_end_ydoy)
+        start_of_ydoy, end_of_ydoy = self.validate_input_date_range(request)
 
         try:
             data = fetch.Msid(mnemonic, start_of_ydoy, end_of_ydoy)
-            times = Time(data.times, format="unix", scale='utc').iso.tolist()
+            times = self.validate_fetched_times(data.times)
+            min_max_values = self.validate_fetched_values(data.vals)
             values = data.vals.tolist()
+
             telemetry = [
                 {
                     'levelOfDetail': 1,
                     'mnemonic': mnemonic,
-                    'minValue': data.vals.min(),
-                    'maxValue': data.vals.max(),
-                    'startTime': times[0],
-                    'endTime': times[-1],
+                    'minValue': min_max_values[0],
+                    'maxValue': min_max_values[1],
+                    'startTime': self.start_time,
+                    'endTime': self.end_time,
                     'x': times,
                     'y': values,
                 }
@@ -163,7 +198,6 @@ class FetchPlotDataAPIView(APIView):
 
         tomorrow = datetime.datetime.now() + timedelta(days=1)
         default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
-
         mnemonic = request.GET.get('mnemonic', None)
         start_of_ydoy = request.GET.get('start_of_range')
         end_of_ydoy = request.GET.get(
@@ -203,29 +237,31 @@ class MnemonicStatisticsView(APIView):
     """ APIView to to return data and meta-data for rendering plotly
         plots.
     """
+
     def get(self, request, format='json'):
 
-        mnemonic = request.GET.get('mnemonic', None)
-        interval = request.GET.get('interval', '5min')
-
         try:
-            stats, group = fetch.read_stats_file(mnemonic, interval)
-            try:
-                for idx, stat in enumerate(stats):
-                    tmp = list(stat)
-                    tmp[0] = Time((tmp[0] * 328), format='unix').iso
-                    stats[idx] = tuple(tmp)
-            except Exception as err:
-                print(err.args[0])
+            mnemonic = request.GET.get('mnemonic', None)
+            start_yday, end_yday = provide_default_date_range(request)
+            interval = request.GET.get('interval', '5min')
+
+            mmenmonic_stats = fetch.MSID(mnemonic, start_yday, end_yday, stat=interval)
+
+            stats = {
+                'indexes': mmenmonic_stats.indexes.tolist(),
+                'times': mmenmonic_stats.times.tolist(),
+                'values': mmenmonic_stats.vals.tolist(),
+                'mins': mmenmonic_stats.mins.tolist(),
+                'maxes': mmenmonic_stats.maxes.tolist(),
+                'means': mmenmonic_stats.maxes.tolist(),
+                'midvals':  mmenmonic_stats.midvals.tolist(),
+            }
 
         except Exception as err:
-
             return HttpResponse(
-                json.dumps({'message': err.args[0]}),
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content_type='application/json')
+                            json.dumps({'error': err.args[0]}),
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            content_type='application/json'
+                   )
 
-        return HttpResponse(
-            json.dumps({'stats': stats}),
-            status=status.HTTP_200_OK,
-            content_type='application/json')
+        return HttpResponse(json.dumps({'stats' : stats}), status=status.HTTP_200_OK, content_type='application/json')

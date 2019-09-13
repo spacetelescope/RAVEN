@@ -21,6 +21,8 @@ BASE_DIR = Path(__file__).ancestor(2)
 MEDIA_ROOT = BASE_DIR.child("media")
 STATIC_ROOT = BASE_DIR.child("static")
 
+MIN_DATE_EPOCH = '2008:001:00:00:00.000'
+
 def get_env_variable(var_name):
 
     try:

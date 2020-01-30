@@ -14,15 +14,17 @@ class InfoAPIView(APIView):
 
     def get(self, request, format='json'):
 
+        from ...apiv1_urls import api_version
+
         info = dict({
             'info': {
                'staging_directory': os.environ['STAGING_DIRECTORY'],
                'telemetry_archive': os.environ['TELEMETRY_ARCHIVE']
-            }
+            },
+            'version': api_version
         })
 
         return HttpResponse(
             json.dumps(info),
             status=status.HTTP_200_OK,
             content_type='application/json')
-

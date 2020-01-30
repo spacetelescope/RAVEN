@@ -1,5 +1,18 @@
-.vscode
-*.pyc
+# Python
 __pycache__
-*.DS_store
+*.pyc
+
+# IDE/Editor
+.vscode
+.idea
+bin
+*~
+*.swp
+*.swo
+
+# MacOS
+.DS_Store
+
+# Project
 temp
+config/db.sqlite3

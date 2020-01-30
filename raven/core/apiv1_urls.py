@@ -5,7 +5,7 @@ from raven.core.api.v1 import views as core_views
 
 api_version = {
     'MAJOR_VERSION': 1,
-    'MINOR_VERSION': 0,
+    'MINOR_VERSION': 1,
     'PATCH_VERSION': 0,
 }
 
@@ -26,6 +26,11 @@ urlpatterns = [
         name='fetch_date_range'
     ),
     url(
+        regex='fetch/min-mean-max',
+        view=fetch_views.FetchMinMeanMax.as_view(),
+        name='fetch_min_mean_max'
+    ),
+    url(
         regex='fetch',
         view=fetch_views.FetchEngineeringTelemetryAPIView.as_view(),
         name='fetch'
@@ -35,5 +40,4 @@ urlpatterns = [
         view=core_views.InfoAPIView.as_view(),
         name='info'
     ),
-
 ]

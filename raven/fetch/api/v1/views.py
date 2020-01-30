@@ -1,5 +1,4 @@
 import json
-import numpy
 import datetime
 from datetime import timedelta
 
@@ -7,7 +6,6 @@ import requests
 
 from django.http import HttpResponse
 from django.urls import reverse
-from django.views.generic import View
 
 from rest_framework.views import APIView
 from rest_framework import status
@@ -17,6 +15,59 @@ from astropy.time import Time
 from jeta.archive import fetch
 
 from raven.core.util import provide_default_date_range
+
+
+class FetchMinMeanMax(APIView):
+
+    def get(self, request, format='json'):
+
+        try:
+            mnemonic = request.GET.get('mnemonic', None)
+            start_yday, end_yday = provide_default_date_range(request)
+            interval = request.GET.get('interval', '5min')
+
+            mmenmonic_stats = fetch.MSID(
+                                            mnemonic,
+                                            start_yday,
+                                            end_yday,
+                                            stat=interval
+                                        )
+
+            stats = {
+                        'values': mmenmonic_stats.vals.tolist(),
+                        'times': Time(
+                            mmenmonic_stats.times.tolist(),
+                            format="cxcsec",
+                            scale='utc').iso.tolist(),
+                        'mins': mmenmonic_stats.mins.tolist(),
+                        'means': mmenmonic_stats.means.tolist(),
+                        'maxes': mmenmonic_stats.maxes.tolist(),
+                        'tstart': mmenmonic_stats.tstart
+            }
+
+        except (ValueError, IOError, Exception) as err:
+            self.message = err.args[0]
+            return HttpResponse(
+                json.dumps(
+                    {
+                        'message': self.message
+                    }
+                ),
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                content_type='application/json'
+            )
+
+        return HttpResponse(json.dumps(
+                {
+                    'start_yday': start_yday,
+                    'end_yday': end_yday,
+                    'interval': interval,
+                    'data': stats
+                }
+            ),
+            status=status.HTTP_200_OK,
+            content_type='application/json'
+        )
 
 
 class FetchMnemonicDateRangeAPIView(APIView):
@@ -249,7 +300,7 @@ class MnemonicStatisticsView(APIView):
 
             stats = {
                 'indexes': mmenmonic_stats.indexes.tolist(),
-                'times': mmenmonic_stats.times.tolist(),
+                'times': Time(mmenmonic_stats.times.tolist(), format="cxcsec", scale='utc').iso.tolist(),
                 'values': mmenmonic_stats.vals.tolist(),
                 'mins': mmenmonic_stats.mins.tolist(),
                 'maxes': mmenmonic_stats.maxes.tolist(),

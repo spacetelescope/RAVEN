@@ -198,11 +198,15 @@ class FetchEngineeringTelemetryAPIView(APIView):
         start_of_ydoy, end_of_ydoy = self.validate_input_date_range(request)
 
         try:
-            print(f'Date Range: {start_of_ydoy}:{end_of_ydoy}')
+            print(f'Date Range: {start_of_ydoy} : {end_of_ydoy}')
             data = fetch.Msid(mnemonic, start_of_ydoy, end_of_ydoy)
+            print('Getting data was fine')
             times = self.validate_fetched_times(data.times)
+            print('Getting times was fine')
             min_max_values = self.validate_fetched_values(data.vals)
+            print('min_max_values fine')
             values = data.vals.tolist()
+            print('values to list fine')
 
             telemetry = [
                 {
@@ -216,6 +220,7 @@ class FetchEngineeringTelemetryAPIView(APIView):
                     'y': values,
                 }
             ]
+            print('Nothing left to do')
 
         except Exception as err:
             raise err

@@ -226,7 +226,11 @@ class FetchEngineeringTelemetryAPIView(APIView):
         except Exception as err:
 
             return HttpResponse(
-                json.dumps({'message': err.args[0]}),
+                json.dumps({
+                    'message': err.args[0],
+                    'source': 'raven.api',
+                    'class': 'FetchEngineeringTelemetryAPIView',
+                }),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content_type='application/json')
 
@@ -257,14 +261,19 @@ class FetchPlotDataAPIView(APIView):
 
         try:
             response = requests.get(fetch_url, params={
-                'mnemonic': mnemonic,
-                'start_of_ydoy': start_of_ydoy,
-                'end_of_ydoy': end_of_ydoy
-                })
+                    'mnemonic': mnemonic,
+                    'start_of_ydoy': start_of_ydoy,
+                    'end_of_ydoy': end_of_ydoy
+            })
 
         except Exception as err:
             return HttpResponse(
-                json.dumps({'message': err.args[0]}),
+                json.dumps({
+                        'message': err.args[0],
+                        'source': 'raven.api',
+                        'class': 'FetchPlotDataAPIView',
+                    },
+                ),
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content_type='application/json')
 

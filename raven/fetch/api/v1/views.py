@@ -198,6 +198,7 @@ class FetchEngineeringTelemetryAPIView(APIView):
         start_of_ydoy, end_of_ydoy = self.validate_input_date_range(request)
 
         try:
+            print(f'Date Range: {start_of_ydoy}:{end_of_ydoy}')
             data = fetch.Msid(mnemonic, start_of_ydoy, end_of_ydoy)
             times = self.validate_fetched_times(data.times)
             min_max_values = self.validate_fetched_values(data.vals)

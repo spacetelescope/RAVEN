@@ -130,7 +130,10 @@ class FetchEngineeringTelemetryAPIView(APIView):
         start_of_ydoy = request.GET.get('start_of_ydoy')
         end_of_ydoy = request.GET.get('end_of_ydoy', '')
 
-        if end_of_ydoy == '':
+        if start_of_ydoy == '' or start_of_ydoy is None:
+            start_of_ydoy == '2008:001:00:00:00.000'
+
+        if end_of_ydoy == '' or end_of_ydoy is None:
             end_of_ydoy = default_end_ydoy
 
         return start_of_ydoy, end_of_ydoy

@@ -131,7 +131,7 @@ class FetchEngineeringTelemetryAPIView(APIView):
         end_of_ydoy = request.GET.get('end_of_ydoy', '')
         print("sdoy val")
         print(start_of_ydoy)
-        if start_of_ydoy == '' or start_of_ydoy is None:
+        if start_of_ydoy == '' or start_of_ydoy is None or start_of_ydoy == 'None':
             start_of_ydoy == '2008:001:00:00:00.000'
 
         if end_of_ydoy == '' or end_of_ydoy is None:
@@ -198,21 +198,12 @@ class FetchEngineeringTelemetryAPIView(APIView):
 
         start_of_ydoy, end_of_ydoy = self.validate_input_date_range(request)
 
-        print("Before fetch")
-        print(mnemonic)
-        print(start_of_ydoy)
-        print(end_of_ydoy)
-
         try:
-            print(f'Date Range: {start_of_ydoy} : {end_of_ydoy}')
+
             data = fetch.Msid(mnemonic, start_of_ydoy, end_of_ydoy)
-            print('Getting data was fine')
             times = self.validate_fetched_times(data.times)
-            print('Getting times was fine')
             min_max_values = self.validate_fetched_values(data.vals)
-            print('min_max_values fine')
             values = data.vals.tolist()
-            print('values to list fine')
 
             telemetry = [
                 {
@@ -226,7 +217,6 @@ class FetchEngineeringTelemetryAPIView(APIView):
                     'y': values,
                 }
             ]
-            print('Nothing left to do')
 
         except Exception as err:
             raise err

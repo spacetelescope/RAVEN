@@ -129,16 +129,13 @@ class FetchEngineeringTelemetryAPIView(APIView):
 
         start_of_ydoy = request.GET.get('start_of_ydoy')
         end_of_ydoy = request.GET.get('end_of_ydoy', '')
-        print("sdoy val")
-        print(start_of_ydoy)
-        print(start_of_ydoy == None or start_of_ydoy == '' or start_of_ydoy is None)
-        if start_of_ydoy == None or start_of_ydoy == '' or start_of_ydoy is None:
-            start_of_ydoy == '2008:001:00:00:00.000'
+
+        if start_of_ydoy is None or start_of_ydoy == '' or start_of_ydoy == 'None':
+            start_of_ydoy = '2008:001:00:00:00.000'
 
         if end_of_ydoy == '' or end_of_ydoy is None:
             end_of_ydoy = default_end_ydoy
 
-        print(start_of_ydoy)
         return start_of_ydoy, end_of_ydoy
 
     def validate_fetched_times(self, times):

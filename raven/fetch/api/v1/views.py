@@ -125,11 +125,12 @@ class FetchEngineeringTelemetryAPIView(APIView):
     def validate_input_date_range(self, request):
 
         tomorrow = datetime.datetime.now() + timedelta(days=1)
-        default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
+        default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday:03d}:00:00:00.000"
 
         start_of_ydoy = request.GET.get('start_of_ydoy')
         end_of_ydoy = request.GET.get('end_of_ydoy', '')
-
+        print("sdoy val")
+        print(start_of_ydoy)
         if start_of_ydoy == '' or start_of_ydoy is None:
             start_of_ydoy == '2008:001:00:00:00.000'
 

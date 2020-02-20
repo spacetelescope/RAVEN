@@ -50,7 +50,12 @@ class FetchMinMeanMax(APIView):
             return HttpResponse(
                 json.dumps(
                     {
-                        'message': self.message
+                        'message': self.message,
+                        'interval': interval,
+                        'start_yday': start_yday,
+                        'end_yday': end_yday,
+                        'class': 'FetchMinMeanMax',
+                        'source': 'raven.api.v1'
                     }
                 ),
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -325,7 +330,11 @@ class MnemonicStatisticsView(APIView):
 
         except Exception as err:
             return HttpResponse(
-                            json.dumps({'error': err.args[0]}),
+                            json.dumps({
+                                'error': err.args[0],
+                                'source': 'raven.api',
+                                'class': 'MnemonicStatisticsView',
+                            }),
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             content_type='application/json'
                    )

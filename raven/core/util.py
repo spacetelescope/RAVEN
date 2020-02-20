@@ -18,15 +18,12 @@ def provide_default_date_range(dictionary):
     tomorrow = datetime.datetime.now() + timedelta(days=1)
     default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
 
-    try:
-        start_yday = dictionary.GET.get('start_yday', '')
-        end_yday = dictionary.GET.get('end_yday', '')
-    except Exception as err:
-        raise err.args[0]
+    # Default start_yday should be a configurable epic
 
-    if start_yday == '':
-        start_yday = '2008:001:00:00:00.000'
-    if end_yday == '':
-        end_yday = default_end_ydoy
+    try:
+        start_yday = dictionary.GET.get('start_yday', '2008:001:00:00:00.000')
+        end_yday = dictionary.GET.get('end_yday', default_end_ydoy)
+    except Exception as err:
+        raise
 
     return start_yday, end_yday

@@ -192,7 +192,7 @@ class FetchEngineeringTelemetryAPIView(APIView):
             HTTP_500_INTERNAL_SERVER_ERROR: a json object with key `error`
                 with a string value set to the error message for the exception.
         """
-
+        telemetry = None
         mnemonic = request.GET.get('mnemonic').replace(' ', '').upper()
 
         start_of_ydoy, end_of_ydoy = self.validate_input_date_range(request)

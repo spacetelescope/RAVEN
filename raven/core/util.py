@@ -17,13 +17,12 @@ def provide_default_date_range(dictionary):
 
     tomorrow = datetime.datetime.now() + timedelta(days=1)
     default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
-    raise ValueError(default_end_ydoy)
 
     # Default start_yday should be a configurable epic
 
     try:
         start_yday = dictionary.GET.get('start_yday', '2008:001:00:00:00.000')
-        end_yday = dictionary.GET.get('end_yday', default_end_ydoy)
+        end_yday = dictionary.GET.get('end_yday', '2021:001:00:00:00.000')
     except Exception as err:
         raise
 

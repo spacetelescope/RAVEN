@@ -203,11 +203,13 @@ class FetchEngineeringTelemetryAPIView(APIView):
             times = self.validate_fetched_times(data.times)
             min_max_values = self.validate_fetched_values(data.vals)
             values = data.vals.tolist()
+            data_length = len(values)
 
             telemetry = [
                 {
                     'levelOfDetail': 1,
                     'mnemonic': mnemonic,
+                    'length': data_length,
                     'minValue': min_max_values[0],
                     'maxValue': min_max_values[1],
                     'startTime': self.start_time,

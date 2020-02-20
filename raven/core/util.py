@@ -21,7 +21,7 @@ def provide_default_date_range(dictionary):
 
     try:
         start_yday = dictionary.GET.get('start_yday', '2008:001:00:00:00.000')
-        end_yday = dictionary.GET.get('end_yday', f'{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000')
+        end_yday = dictionary.GET.get('end_yday', f'{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday:03d}:00:00:00.000')
     except Exception as err:
         raise
 

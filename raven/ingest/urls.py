@@ -1,25 +1,25 @@
-from django.conf.urls import url
+from django.urls import path
 
 
 from . import views
 
 urlpatterns = [
-    url(
+    path(
         r'execute',
         views.ExecuteIngestView.as_view(),
         name='execute'
         ),
-    url(
+    path(
         r'message',
         views.IngestMessageView.as_view(),
         name='message'
     ),
-    url(
-        r'update-schedule',
+    path(
+        r'update/schedule',
         views.UpdateIngestSchedule.as_view(),
         name='update_schedule'
     ),
-    url(
+    path(
         r'status',
         views.IngestStatusView.as_view(),
         name='status'

@@ -9,15 +9,15 @@ from rest_framework_simplejwt.views import (
 )
 
 urlpatterns = [
-    path(r'^admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
     path(
-        r'^ingest/',
+        'ingest/',
         include(
             ('raven.ingest.urls', 'ingest'),
             namespace='ingest')
         ),
     path(
-        r'^archive/',
+        'archive/',
         include(
             ('raven.archive.urls', 'archive'),
             namespace='archive')

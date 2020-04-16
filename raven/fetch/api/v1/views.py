@@ -277,6 +277,15 @@ class FetchPlotDataAPIView(APIView):
                     'end_of_ydoy': end_of_ydoy
             })
 
+            plot_data = response.json()
+            plot_data[0]['type'] = 'scattergl'
+            plot_data[0]['mode'] = 'lines+markers'
+            plot_data[0]['line'] = {
+                    'shape': 'hv',
+                    'color': 'rgb(30, 110, 162)'
+                }
+            plot_data[0]['showlegend'] = True
+
         except Exception as err:
             return HttpResponse(
                 json.dumps({
@@ -288,14 +297,7 @@ class FetchPlotDataAPIView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content_type='application/json')
 
-        plot_data = response.json()
-        plot_data[0]['type'] = 'scattergl'
-        plot_data[0]['mode'] = 'lines+markers'
-        plot_data[0]['line'] = {
-                    'shape': 'hv',
-                    'color': 'rgb(30, 110, 162)'
-                }
-        plot_data[0]['showlegend'] = True
+
 
         return HttpResponse(
             json.dumps(plot_data),

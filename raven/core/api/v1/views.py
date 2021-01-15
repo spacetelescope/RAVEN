@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 
 class InfoAPIView(APIView):
 
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
     def get(self, request, format='json'):
 

@@ -15,27 +15,27 @@ api_version = {
 urlpatterns = [
     path(
         'archive/status/msid/count',
-        view=archive_views.get_msid_count(),
+        view=archive_views.get_msid_count,
         name='archive_msid_count'
     ),
     path(
         'archive/status/msid/names',
-        view=archive_views.get_msid_names(),
+        view=archive_views.get_msid_names,
         name='archive_msid_names'
     ),
     path(
         'archive/status/staged/files',
-        view=archive_views.get_list_of_staged_files(),
+        view=archive_views.get_list_of_staged_files,
         name='archive_staged_files'
     ),
     path(
         'archive/status/ingest/history',
-        view=archive_views.get_ingest_history(),
+        view=archive_views.get_ingest_history,
         name='archive_ingest_history'
     ),
     path(
         'archive/status/size',
-        view=archive_views.get_archive_size(),
+        view=archive_views.get_archive_size,
         name='archive_size'
     ),
     path(

@@ -21,7 +21,7 @@ def get_msid_count(request):
         )
 
     return Response(
-        json.dumps({'count': msid_count}),
+        {'count': msid_count},
         status=status.HTTP_200_OK,
         content_type='application/json'
     )

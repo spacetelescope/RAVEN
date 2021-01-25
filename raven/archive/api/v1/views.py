@@ -21,7 +21,7 @@ def get_msid_count(request):
         )
 
     return Response(
-        json.dumps({'count': msid_count}),
+        json.dump({'count': msid_count}),
         status=status.HTTP_200_OK,
         content_type='application/json'
     )
@@ -41,7 +41,7 @@ def get_msid_names(request):
         )
 
     return Response(
-        json.dumps({'msids': msid_names}),
+        json.dump({'msids': msid_names}),
         status=status.HTTP_200_OK,
         content_type='application/json'
     )
@@ -61,7 +61,7 @@ def get_list_of_staged_files(request):
         )
 
     return Response(
-        json.dumps({'staged_files': staged_files}),
+        json.dump({'staged_files': staged_files}),
         status=status.HTTP_200_OK,
         content_type='application/json'
     )
@@ -72,7 +72,7 @@ def get_ingest_history(request):
     """ A function to get metadata about ingest history
     """
     try:
-        ingest_history = archive_status.get_list_of_staged_files()
+        ingest_history = archive_status.get_ingest_history()
     except Exception as err:
         return Response(
             json.dumps({'error': err.args[0]}),
@@ -81,7 +81,7 @@ def get_ingest_history(request):
         )
 
     return Response(
-        json.dumps({'ingest_history': ingest_history}),
+        json.dump({'ingest_history': ingest_history}),
         status=status.HTTP_200_OK,
         content_type='application/json'
     )

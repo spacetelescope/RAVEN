@@ -21,7 +21,7 @@ def get_msid_count(request):
         )
 
     return Response(
-        json.dump({'count': msid_count}),
+        json.loads({'count': msid_count}),
         status=status.HTTP_200_OK,
         content_type='application/json'
     )
@@ -41,7 +41,7 @@ def get_msid_names(request):
         )
 
     return Response(
-        json.dump({'msids': msid_names}),
+        json.loads({'msids': msid_names}),
         status=status.HTTP_200_OK,
         content_type='application/json'
     )
@@ -61,7 +61,7 @@ def get_list_of_staged_files(request):
         )
 
     return Response(
-        json.dump({'staged_files': staged_files}),
+        json.loads({'staged_files': staged_files}),
         status=status.HTTP_200_OK,
         content_type='application/json'
     )
@@ -81,7 +81,7 @@ def get_ingest_history(request):
         )
 
     return Response(
-        json.dump({'ingest_history': ingest_history}),
+        json.loads({'ingest_history': ingest_history}),
         status=status.HTTP_200_OK,
         content_type='application/json'
     )

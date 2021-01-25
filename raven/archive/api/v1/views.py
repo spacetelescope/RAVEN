@@ -15,7 +15,7 @@ def get_msid_count(request):
         msid_count = archive_status.get_msid_count()
     except Exception as err:
         return Response(
-            json.dumps({'error': err.args[0]}),
+            {'error': err.args[0]},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content_type='application/json'
         )
@@ -35,13 +35,13 @@ def get_msid_names(request):
         msid_names = archive_status.get_msid_names()
     except Exception as err:
         return Response(
-            json.dumps({'error': err.args[0]}),
+            {'error': err.args[0]},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content_type='application/json'
         )
 
     return Response(
-        json.dumps({'msids': msid_names}),
+        {'msids': msid_names},
         status=status.HTTP_200_OK,
         content_type='application/json'
     )
@@ -55,13 +55,13 @@ def get_list_of_staged_files(request):
         staged_files = archive_status.get_list_of_staged_files()
     except Exception as err:
         return Response(
-            json.dumps({'error': err.args[0]}),
+            {'error': err.args[0]},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content_type='application/json'
         )
 
     return Response(
-        json.dumps({'staged_files': staged_files}),
+        {'staged_files': staged_files},
         status=status.HTTP_200_OK,
         content_type='application/json'
     )
@@ -75,13 +75,13 @@ def get_ingest_history(request):
         ingest_history = archive_status.get_ingest_history()
     except Exception as err:
         return Response(
-            json.dumps({'error': err.args[0]}),
+            {'error': err.args[0]},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content_type='application/json'
         )
 
     return Response(
-        json.dumps({'ingest_history': ingest_history}),
+        {'ingest_history': ingest_history},
         status=status.HTTP_200_OK,
         content_type='application/json'
     )
@@ -92,4 +92,8 @@ def get_archive_size(area, include_backlog=False):
     """ A function to get the size (in bytes) on disk of either the staging
     area or tlm archive
     """
-    return 0
+    return Response(
+        0,
+        status=status.HTTP_200_OK,
+        content_type='application/json'
+    )

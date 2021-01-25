@@ -8,7 +8,7 @@ from jeta.archive import status as archive_status
 
 
 @api_view(http_method_names=['GET'])
-def get_msid_count():
+def get_msid_count(request):
     """ A function to get the current count of msids managed in the archive
     """
     try:
@@ -28,7 +28,7 @@ def get_msid_count():
 
 
 @api_view(http_method_names=['GET'])
-def get_msid_names():
+def get_msid_names(request):
     """ A function to get a list of msids names managed in the archive
     """
     try:
@@ -48,7 +48,7 @@ def get_msid_names():
 
 
 @api_view(http_method_names=['GET'])
-def get_list_of_staged_files():
+def get_list_of_staged_files(request):
     """ A function to get a list of ingest files staged in the archive
     """
     try:
@@ -68,7 +68,7 @@ def get_list_of_staged_files():
 
 
 @api_view(http_method_names=['GET'])
-def get_ingest_history():
+def get_ingest_history(request):
     """ A function to get metadata about ingest history
     """
     try:

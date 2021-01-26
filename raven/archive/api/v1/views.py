@@ -88,11 +88,11 @@ def get_ingest_history(request):
 
 
 @api_view(http_method_names=['GET'])
-def get_archive_size(area, include_backlog=False):
+def get_archive_size(request, area="archive", include_backlog=False):
     """ A function to get the size (in bytes) on disk of either the staging
     area or tlm archive
     """
-    total_size = archive_status.get_total_archive_area_size()
+    total_size = archive_status.get_total_archive_area_size(area)
     return Response(
         total_size,
         status=status.HTTP_200_OK,

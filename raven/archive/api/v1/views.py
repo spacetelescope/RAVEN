@@ -88,11 +88,22 @@ def get_ingest_history(request):
 
 
 @api_view(http_method_names=['GET'])
-def get_archive_size(request, area="archive", include_backlog=False):
+def get_archive_size(request, include_backlog=False):
     """ A function to get the size (in bytes) on disk of either the staging
     area or tlm archive
     """
-    total_size = archive_status.get_total_archive_area_size()
+
+    area = request.GET.get('area', 'archive')
+
+    try:
+        total_size = archive_status.get_total_archive_area_size(area)
+    except Exception as err:
+        return Response(
+            {'error': err.args[0]},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content_type='application/json'
+        )
+
     return Response(
         total_size,
         status=status.HTTP_200_OK,

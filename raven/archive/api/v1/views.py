@@ -92,7 +92,7 @@ def get_archive_size(request, area="archive", include_backlog=False):
     """ A function to get the size (in bytes) on disk of either the staging
     area or tlm archive
     """
-    total_size = archive_status.get_total_archive_area_size(request.GET.get('area'), 'archive')
+    total_size = archive_status.get_total_archive_area_size()
     return Response(
         total_size,
         status=status.HTTP_200_OK,

@@ -260,45 +260,44 @@ class FetchPlotDataAPIView(APIView):
 
     def get(self, request, format='json'):
 
-        fetch_url = request.build_absolute_uri(reverse('apiv1:fetch'))
+        # fetch_url = request.build_absolute_uri(reverse('apiv1:fetch'))
 
-        tomorrow = datetime.datetime.now() + timedelta(days=1)
-        default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
-        mnemonic = request.GET.get('mnemonic', None)
-        start_of_ydoy = request.GET.get('start_of_range')
-        end_of_ydoy = request.GET.get(
-            'end_of_range',
-            default_end_ydoy)
+        # tomorrow = datetime.datetime.now() + timedelta(days=1)
+        # default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
+        # mnemonic = request.GET.get('mnemonic', None)
+        # start_of_ydoy = request.GET.get('start_of_range')
+        # end_of_ydoy = request.GET.get(
+        #     'end_of_range',
+        #     default_end_ydoy)
 
-        try:
-            response = requests.get(fetch_url, params={
-                    'mnemonic': mnemonic,
-                    'start_of_ydoy': start_of_ydoy,
-                    'end_of_ydoy': end_of_ydoy
-            })
+        # try:
+        #     response = requests.get(fetch_url, params={
+        #             'mnemonic': mnemonic,
+        #             'start_of_ydoy': start_of_ydoy,
+        #             'end_of_ydoy': end_of_ydoy
+        #     })
 
-            plot_data = response.json()
-            plot_data[0]['type'] = 'scattergl'
-            plot_data[0]['mode'] = 'lines+markers'
-            plot_data[0]['line'] = {
-                    'shape': 'hv',
-                    'color': 'rgb(30, 110, 162)'
-                }
-            plot_data[0]['showlegend'] = True
+        #     plot_data = response.json()
+        #     plot_data[0]['type'] = 'scattergl'
+        #     plot_data[0]['mode'] = 'lines+markers'
+        #     plot_data[0]['line'] = {
+        #             'shape': 'hv',
+        #             'color': 'rgb(30, 110, 162)'
+        #         }
+        #     plot_data[0]['showlegend'] = True
 
-        except Exception as err:
-            return HttpResponse(
-                json.dumps({
-                        'message': err.args[0],
-                        'source': 'raven.api',
-                        'class': 'FetchPlotDataAPIView',
-                    },
-                ),
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content_type='application/json')
+        # except Exception as err:
+        #     return HttpResponse(
+        #         json.dumps({
+        #                 'message': err.args[0],
+        #                 'source': 'raven.api',
+        #                 'class': 'FetchPlotDataAPIView',
+        #             },
+        #         ),
+        #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #         content_type='application/json')
 
-
-
+        plot_data = 0
         return HttpResponse(
             json.dumps(plot_data),
             status=status.HTTP_200_OK,

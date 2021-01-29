@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import status
 
 from astropy.time import Time
@@ -297,9 +298,9 @@ class FetchPlotDataAPIView(APIView):
         #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         #         content_type='application/json')
 
-        plot_data = 0
-        return HttpResponse(
-            json.dumps(plot_data),
+        plot_data = 42
+        return Response(
+            plot_data,
             status=status.HTTP_200_OK,
             content_type='application/json')
 

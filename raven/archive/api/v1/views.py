@@ -8,6 +8,27 @@ from jeta.archive import status as archive_status
 
 
 @api_view(http_method_names=['GET'])
+def get_ingest_files(request):
+
+    ingest_id = request.GET.get('ingest_id', -1)
+
+    try:
+        ingest_files = archive_status.get_ingest_files(ingest_id)
+    except Exception as err:
+        return Response(
+            {'error': err.args[0]},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content_type='application/json'
+        )
+
+    return Response(
+        ingest_files,
+        status=status.HTTP_200_OK,
+        content_type='application/json'
+    )
+
+
+@api_view(http_method_names=['GET'])
 def get_msid_count(request):
     """ A function to get the current count of msids managed in the archive
     """

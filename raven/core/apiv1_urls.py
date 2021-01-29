@@ -8,8 +8,8 @@ from raven.core.api.v1 import views as core_views
 
 api_version = {
     'MAJOR_VERSION': 1,
-    'MINOR_VERSION': 7,
-    'PATCH_VERSION': 2,
+    'MINOR_VERSION': 8,
+    'PATCH_VERSION': 5,
 }
 
 urlpatterns = [
@@ -32,6 +32,11 @@ urlpatterns = [
         'archive/status/ingest/history',
         view=archive_views.get_ingest_history,
         name='archive_ingest_history'
+    ),
+    path(
+        'archive/status/ingest/files',
+        view=archive_views.get_ingest_files,
+        name='get_ingest_files'
     ),
     path(
         'archive/status/size',

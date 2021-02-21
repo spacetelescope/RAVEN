@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework import status
 
 from astropy.time import Time
@@ -260,15 +261,18 @@ class FetchPlotDataAPIView(APIView):
 
     def get(self, request, format='json'):
 
+        mnemonic = request.GET.get('mnemonic', None)
         fetch_url = request.build_absolute_uri(reverse('apiv1:fetch'))
 
         tomorrow = datetime.datetime.now() + timedelta(days=1)
         default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
-        mnemonic = request.GET.get('mnemonic', None)
+
         start_of_ydoy = request.GET.get('start_of_range')
+
         end_of_ydoy = request.GET.get(
             'end_of_range',
-            default_end_ydoy)
+            default_end_ydoy
+        )
 
         try:
             response = requests.get(fetch_url, params={
@@ -276,6 +280,17 @@ class FetchPlotDataAPIView(APIView):
                     'start_of_ydoy': start_of_ydoy,
                     'end_of_ydoy': end_of_ydoy
             })
+
+            plot_data = response.json()
+            plot_data[0]['type'] = 'scattergl'
+            plot_data[0]['mode'] = 'lines+markers'
+
+            plot_data[0]['line'] = {
+                    'shape': 'hv',
+                    'color': 'rgb(30, 110, 162)'
+            }
+
+            plot_data[0]['showlegend'] = True
 
         except Exception as err:
             return HttpResponse(
@@ -288,17 +303,9 @@ class FetchPlotDataAPIView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content_type='application/json')
 
-        plot_data = response.json()
-        plot_data[0]['type'] = 'scattergl'
-        plot_data[0]['mode'] = 'lines+markers'
-        plot_data[0]['line'] = {
-                    'shape': 'hv',
-                    'color': 'rgb(30, 110, 162)'
-                }
-        plot_data[0]['showlegend'] = True
-
-        return HttpResponse(
-            json.dumps(plot_data),
+        # plot_data = 42
+        return Response(
+            plot_data,
             status=status.HTTP_200_OK,
             content_type='application/json')
 

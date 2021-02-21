@@ -1,42 +1,75 @@
-from django.conf.urls import url, include
+from django.urls import path, include
 
 from raven.fetch.api.v1 import views as fetch_views
+from raven.archive.api.v1 import views as archive_views
+
 from raven.core.api.v1 import views as core_views
+
 
 api_version = {
     'MAJOR_VERSION': 1,
-    'MINOR_VERSION': 1,
-    'PATCH_VERSION': 0,
+    'MINOR_VERSION': 8,
+    'PATCH_VERSION': 5,
 }
 
 urlpatterns = [
-    url(
-        regex='fetch/plot',
+    path(
+        'archive/status/msid/count',
+        view=archive_views.get_msid_count,
+        name='archive_msid_count'
+    ),
+    path(
+        'archive/status/msid/names',
+        view=archive_views.get_msid_names,
+        name='archive_msid_names'
+    ),
+    path(
+        'archive/status/staged/files',
+        view=archive_views.get_list_of_staged_files,
+        name='archive_staged_files'
+    ),
+    path(
+        'archive/status/ingest/history',
+        view=archive_views.get_ingest_history,
+        name='archive_ingest_history'
+    ),
+    path(
+        'archive/status/ingest/files',
+        view=archive_views.get_ingest_files,
+        name='get_ingest_files'
+    ),
+    path(
+        'archive/status/size',
+        view=archive_views.get_archive_size,
+        name='archive_size'
+    ),
+    path(
+        'fetch/plot',
         view=fetch_views.FetchPlotDataAPIView.as_view(),
         name='fetch_plot'
     ),
-    url(
-        regex='fetch/stats',
+    path(
+        'fetch/stats',
         view=fetch_views.MnemonicStatisticsView.as_view(),
         name='fetch_stats'
     ),
-    url(
-        regex='fetch/date-range',
+    path(
+        'fetch/date-range',
         view=fetch_views.FetchMnemonicDateRangeAPIView.as_view(),
         name='fetch_date_range'
     ),
-    url(
-        regex='fetch/min-mean-max',
+    path(
+        'fetch/min-mean-max',
         view=fetch_views.FetchMinMeanMax.as_view(),
         name='fetch_min_mean_max'
     ),
-    url(
-        regex='fetch',
+    path(
+        'fetch',
         view=fetch_views.FetchEngineeringTelemetryAPIView.as_view(),
         name='fetch'
     ),
-    url(
-        regex='info',
+    path(
+        'info',
         view=core_views.InfoAPIView.as_view(),
         name='info'
     ),

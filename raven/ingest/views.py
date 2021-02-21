@@ -23,81 +23,81 @@ from rest_framework import status
 
 # from celery.schedules import schedule as celery_ingest_schedule
 
-from jeta.archive.controller import Utilities
-from jeta.ingest.controller import execute
+# from jeta.archive.controller import Utilities
+# from jeta.ingest.controller import execute
 
-from jeta.ingest.controller import set_ingest_schedule
-from jeta.ingest.controller import get_ingest_status
-
-
-class UpdateIngestSchedule(APIView):
-
-    def post(self, request, format=None):
-
-        response = set_ingest_schedule(celery_ingest_schedule(run_every=60))
-
-        content = {'response': response}
-        return Response(json.dumps(content),
-                        status=status.HTTP_200_OK,
-                        content_type='application/json')
+# from jeta.ingest.controller import set_ingest_schedule
+# from jeta.ingest.controller import get_ingest_status
 
 
-class IngestMessageView(View):
+# class UpdateIngestSchedule(APIView):
 
-    def __init__(self):
+#     def post(self, request, format=None):
 
-        self.status = 202
+#         response = set_ingest_schedule(celery_ingest_schedule(run_every=60))
 
-    def get(self, request):
-
-        with Connection('redis://') as conn:
-
-            try:
-                ingest_queue = conn.SimpleQueue('ingest_queue')
-                message = ingest_queue.get(block=True, timeout=1)
-                print('Received: {0}'.format(message.payload))
-                message.ack()
-                ingest_queue.close()
-            except Exception as err:
-                # print(err.args[0])
-                HttpResponse(json.dumps({'error': str(err.args[0])}))
-
-        return HttpResponse(json.dumps({'message': str(message),'payload': message.payload}), status=self.status, content_type='application/json')
+#         content = {'response': response}
+#         return Response(json.dumps(content),
+#                         status=status.HTTP_200_OK,
+#                         content_type='application/json')
 
 
-class IngestStatusView(View):
+# class IngestMessageView(View):
 
-    def get(self, request):
+#     def __init__(self):
 
-        return HttpResponse(get_ingest_status(request.GET.get('task_id', 1)), content_type='application/json')
+#         self.status = 202
+
+#     def get(self, request):
+
+#         with Connection('redis://') as conn:
+
+#             try:
+#                 ingest_queue = conn.SimpleQueue('ingest_queue')
+#                 message = ingest_queue.get(block=True, timeout=1)
+#                 print('Received: {0}'.format(message.payload))
+#                 message.ack()
+#                 ingest_queue.close()
+#             except Exception as err:
+#                 # print(err.args[0])
+#                 HttpResponse(json.dumps({'error': str(err.args[0])}))
+
+#         return HttpResponse(json.dumps({'message': str(message),'payload': message.payload}), status=self.status, content_type='application/json')
 
 
-class StopIngestView(View):
+# class IngestStatusView(View):
 
-    def __init__(self):
-        self.status = 202
+#     def get(self, request):
 
-    def post(self, request):
-
-        self.status = 400
-
-        return HttpResponse(json.dumps({'message': 'call not implemented'}), status=self.status, content_type='application/json')
+#         return HttpResponse(get_ingest_status(request.GET.get('task_id', 1)), content_type='application/json')
 
 
-class ExecuteIngestView(APIView):
+# class StopIngestView(View):
 
-    def post(self, request, format=None):
+#     def __init__(self):
+#         self.status = 202
 
-        try:
-            Utilities.prepare_archive_on_disk()
-            content = execute()
-        except Exception as err:
-            return HttpResponse(
-                json.dumps(err.args[0]),
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content_type='application/json')
+#     def post(self, request):
 
-        return HttpResponse(
-            json.dumps(content),
-            status=status.HTTP_200_OK,
-            content_type='application/json')
+#         self.status = 400
+
+#         return HttpResponse(json.dumps({'message': 'call not implemented'}), status=self.status, content_type='application/json')
+
+
+# class ExecuteIngestView(APIView):
+
+#     def post(self, request, format=None):
+
+#         try:
+#             Utilities.prepare_archive_on_disk()
+#             content = execute()
+#         except Exception as err:
+#             return HttpResponse(
+#                 json.dumps(err.args[0]),
+#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#                 content_type='application/json')
+
+#         return HttpResponse(
+#             json.dumps(content),
+#             status=status.HTTP_200_OK,
+#             content_type='application/json')

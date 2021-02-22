@@ -303,11 +303,6 @@ class FetchPlotDataAPIView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content_type='application/json')
 
-
-
-        return HttpResponse(
-            json.dumps(plot_data),
-        # plot_data = 42
         return Response(
             plot_data,
             status=status.HTTP_200_OK,

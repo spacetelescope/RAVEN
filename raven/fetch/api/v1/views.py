@@ -212,7 +212,7 @@ class FetchEngineeringTelemetryAPIView(APIView):
                 interval = np.round(np.linspace(0, len(msid) - 1, 50_000)).astype(int)
 
                 plot_x = msid.times[interval]
-                plot_y = msid.vals[interval].tolist()
+                plot_y = msid.vals[interval]
 
                 plot_x = self.validate_fetched_times(plot_x)
                 min_max_values = self.validate_fetched_values(plot_y)

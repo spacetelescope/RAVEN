@@ -3,6 +3,7 @@ import datetime
 from datetime import timedelta
 
 import requests
+import numpy as np
 
 from django.http import HttpResponse
 from django.urls import reverse
@@ -205,11 +206,23 @@ class FetchEngineeringTelemetryAPIView(APIView):
 
         try:
 
-            data = fetch.Msid(mnemonic, start_of_ydoy, end_of_ydoy)
-            times = self.validate_fetched_times(data.times)
-            min_max_values = self.validate_fetched_values(data.vals)
-            values = data.vals.tolist()
-            data_length = len(values)
+            msid = fetch.Msid(mnemonic, start_of_ydoy, end_of_ydoy)
+
+            if len(msid) > 50_000:
+                interval = np.round(np.linspace(0, len(msid) - 1, 50_000)).astype(int)
+
+                plot_x = msid.times[interval]
+                plot_y = msid.vals[interval]
+
+                plot_x = self.validate_fetched_times(plot_x)
+                min_max_values = self.validate_fetched_values(plot_y)
+                plot_y = plot_y.tolist()
+            else:
+                plot_x = self.validate_fetched_times(msid.times)
+                min_max_values = self.validate_fetched_values(msid.vals)
+                plot_y = msid.vals.tolist()
+
+            data_length = len(plot_y)
 
             telemetry = [
                 {
@@ -220,8 +233,8 @@ class FetchEngineeringTelemetryAPIView(APIView):
                     'maxValue': min_max_values[1],
                     'startTime': self.start_time,
                     'endTime': self.end_time,
-                    'x': times,
-                    'y': values,
+                    'x': plot_x,
+                    'y': plot_y,
                 }
             ]
 

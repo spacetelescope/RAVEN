@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'raven.fetch',
     'raven.archive',
     'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -58,18 +59,11 @@ MIDDLEWARE = [
 ]
 
 # Django REST Framework and DRF Authentication
-from datetime import timedelta
-
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
-#     'REFRESH_TOKEN_LIFETIME': timedelta(days=14),
-# }
-
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': (
-#         'rest_framework_simplejwt.authentication.JWTAuthentication',
-#     )
-# }
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
 
 ROOT_URLCONF = 'config.urls'
 

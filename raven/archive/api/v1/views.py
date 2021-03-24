@@ -2,12 +2,20 @@ import json
 
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes
+)
 
 from jeta.archive import status as archive_status
 
 
 @api_view(http_method_names=['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_ingest_files(request):
 
     ingest_id = request.GET.get('ingest_id', -1)
@@ -29,6 +37,8 @@ def get_ingest_files(request):
 
 
 @api_view(http_method_names=['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_msid_count(request):
     """ A function to get the current count of msids managed in the archive
     """
@@ -49,6 +59,8 @@ def get_msid_count(request):
 
 
 @api_view(http_method_names=['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_msid_names(request):
     """ A function to get a list of msids names managed in the archive
     """
@@ -69,6 +81,8 @@ def get_msid_names(request):
 
 
 @api_view(http_method_names=['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_list_of_staged_files(request):
     """ A function to get a list of ingest files staged in the archive
     """
@@ -89,6 +103,8 @@ def get_list_of_staged_files(request):
 
 
 @api_view(http_method_names=['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_ingest_history(request):
     """ A function to get metadata about ingest history
     """
@@ -109,6 +125,8 @@ def get_ingest_history(request):
 
 
 @api_view(http_method_names=['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_archive_size(request, include_backlog=False):
     """ A function to get the size (in bytes) on disk of either the staging
     area or tlm archive

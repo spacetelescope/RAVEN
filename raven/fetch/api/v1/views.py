@@ -8,6 +8,8 @@ import numpy as np
 from django.http import HttpResponse
 from django.urls import reverse
 
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -20,6 +22,9 @@ from raven.core.util import provide_default_date_range
 
 
 class FetchMinMeanMax(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, format='json'):
 
@@ -84,6 +89,9 @@ class FetchMnemonicDateRangeAPIView(APIView):
         NOTE: View only implements the HTTP GET method. All other calls should return 405.
     """
 
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, format='json'):
 
         """ HTTP GET method implementation for fetching the date range.
@@ -128,6 +136,9 @@ class FetchEngineeringTelemetryAPIView(APIView):
 
         NOTE: View only implements the HTTP GET method. All other calls should return 405.
     """
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def validate_input_date_range(self, request):
 
@@ -272,6 +283,9 @@ class FetchPlotDataAPIView(APIView):
         plots.
     """
 
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, format='json'):
 
         mnemonic = request.GET.get('mnemonic', None)
@@ -327,6 +341,9 @@ class MnemonicStatisticsView(APIView):
     """ APIView to to return data and meta-data for rendering plotly
         plots.
     """
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, format='json'):
 

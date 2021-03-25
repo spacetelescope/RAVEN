@@ -1,17 +1,12 @@
 import os
 import json
 
-from django.conf import settings
 from django.http import HttpResponse
 
 from rest_framework import status
-from rest_framework.authentication import  TokenAuthentication
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.views import APIView
-
-
-# from raven.core.apiv1_urls import api_version as version
 
 
 class InfoAPIView(APIView):

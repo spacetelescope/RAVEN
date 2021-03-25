@@ -1,15 +1,14 @@
 from django.urls import include, path
 from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework.authtoken import views
 from django.contrib import admin
 
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path(
+        'admin/',
+        admin.site.urls
+    ),
     path(
         'ingest/',
         include(
@@ -29,20 +28,9 @@ urlpatterns = [
             namespace='apiv1')
         ),
     path(
-        'api/token/',
-        TokenObtainPairView.as_view(),
-        name='token_obtain_pair'
-    ),
-    path(
-        'api/token/refresh/',
-        TokenRefreshView.as_view(),
-        name='token_refresh'
-    ),
-    path(
-        'api/token/verify/',
-        TokenVerifyView.as_view(),
-        name='token_verify'
-    ),
+        'api-token-auth/',
+        views.obtain_auth_token
+    )
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

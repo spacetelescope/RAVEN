@@ -1,4 +1,4 @@
-Django==2.2
+Django==2.2.27
 djangorestframework==3.9.0
 djangorestframework-simplejwt==4.4.0
 
@@ -15,3 +15,10 @@ Unipath==1.1
 urllib3==1.23
 
 gunicorn==19.8.1
+
+numpy==1.22.3
+cython==0.29.28
+# jeta==2.18.4
+astropy==5.0.1
+h5py==3.6.0
+tables==3.7.0

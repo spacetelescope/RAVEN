@@ -59,11 +59,15 @@ class FetchFullResolutionData(APIView):
             tstart, tstop = self.default_date_range(request) 
             # fetch the data for the range
             data = fetch.MSID(msid, tstart, tstop)
+            records_total = len(data)
+
             # Get the subset for the page
             times = Time(data.times[idx0:length], format='unix').yday
             values = data.vals[idx0:idx0+length]
             # return to client
             full_resolution_data  = list(zip(times, values))
+            filtered_records = len(full_resolution_data)
+
         except Exception as err:
             return HttpResponse(
                             json.dumps({'error': err.args[0]}),
@@ -71,7 +75,7 @@ class FetchFullResolutionData(APIView):
                             content_type='application/json'
                    )
         return HttpResponse(
-                        json.dumps({'data': full_resolution_data}),
+                        json.dumps({'data': full_resolution_data, 'recordsTotal': records_total, 'recordsFiltered': filtered_records}),
                         status=status.HTTP_200_OK,
                         content_type='application/json'
                )

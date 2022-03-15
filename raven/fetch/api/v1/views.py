@@ -345,6 +345,33 @@ class MnemonicStatisticsView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def get_data(self, stats, interval):
+        if interval == '5min':
+            return {
+                    'indexes': stats.indexes.tolist(),
+                    'times': Time(stats.times.tolist(), format="unix", scale='utc').yday.tolist(),
+                    'values': stats.vals.tolist(),
+                    'mins': stats.mins.tolist(),
+                    'maxes': stats.maxes.tolist(),
+                    'means': stats.maxes.tolist(),
+                    'midvals': stats.midvals.tolist(),
+                }
+        if interval == 'daily':
+            return {
+                'times': Time(stats.times.tolist(), format="unix", scale='utc').yday.tolist(),
+                'mins': stats.mins.tolist(),
+                'maxes': stats.maxes.tolist(),
+                'means': stats.maxes.tolist(),
+                'stds': stats.stds.tolist(),
+                'p01s': stats.p01s.tolist(),
+                'p05s': stats.p05s.tolist(),
+                'p16s': stats.p16s.tolist(),
+                'p50s': stats.p50s.tolist(),
+                'p84s': stats.p84s.tolist(),
+                'p95s': stats.p95s.tolist(),
+                'p99s': stats.p99s.tolist()
+            }
+
     def get(self, request, format='json'):
         """ HTTP get method controller to handle fetch requests for msid stats
         """
@@ -355,17 +382,9 @@ class MnemonicStatisticsView(APIView):
             interval = request.GET.get('interval')
             if interval == '':
                 interval = '5min'
-            stats = fetch.MSID(msid, tstart, tstop, stat=interval)
 
-            stats = {
-                'indexes': stats.indexes.tolist(),
-                'times': Time(stats.times.tolist(), format="unix", scale='utc').yday.tolist(),
-                'values': stats.vals.tolist(),
-                'mins': stats.mins.tolist(),
-                'maxes': stats.maxes.tolist(),
-                'means': stats.maxes.tolist(),
-                'midvals': stats.midvals.tolist(),
-            }
+            stats = fetch.MSID(msid, tstart, tstop, stat=interval)
+            stats = self.get_data(stats, interval)
 
         except (Exception, ValueError) as err:
             return HttpResponse(

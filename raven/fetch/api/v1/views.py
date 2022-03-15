@@ -20,66 +20,61 @@ from jeta.archive import fetch
 
 from raven.core.util import provide_default_date_range
 
-
-class FetchMinMeanMax(APIView):
+class FetchFullResolutionData(APIView):
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def default_date_range(self, request):
+
+        """ A function used to provide default values for start/end yday
+
+        Call Args:
+            dictionary a dict() with assumed keys for tstart and tstop
+
+        Returns:
+            tstart, tstop
+        """
+        tstart = request.GET.get('tstart', None)
+        tstop = request.GET.get('tstop', None)
+    
+        if tstart == '':
+            # Set tstart to launch epoch by default
+            tstart = '2021:358:00:00:00.000'
+        if tstop == '':
+            # Set tstop to the start of the next day by default
+            tomorrow = datetime.datetime.now() + timedelta(days=1)
+            tstop = f'{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday:03d}:00:00:00.000'
+
+        return tstart, tstop
+
     def get(self, request, format='json'):
 
         try:
-            mnemonic = request.GET.get('mnemonic', None)
-            start_yday, end_yday = provide_default_date_range(request)
-            interval = request.GET.get('interval', '5min')
-
-            mmenmonic_stats = fetch.MSID(
-                                            mnemonic,
-                                            start_yday,
-                                            end_yday,
-                                            stat=interval
-                                        )
-
-            stats = {
-                        'values': mmenmonic_stats.vals.tolist(),
-                        'times': Time(
-                            mmenmonic_stats.times.tolist(),
-                            format="cxcsec",
-                            scale='utc').iso.tolist(),
-                        'mins': mmenmonic_stats.mins.tolist(),
-                        'means': mmenmonic_stats.means.tolist(),
-                        'maxes': mmenmonic_stats.maxes.tolist(),
-                        'tstart': mmenmonic_stats.tstart
-            }
-
-        except (ValueError, IOError, Exception) as err:
-            self.message = err.args[0]
+            msid = request.GET.get('msid')
+            draw = request.GET.get('draw')
+            idx0 = int(request.GET.get('idx0'))
+            length = int(request.GET.get('length'))
+    
+            tstart, tstop = self.default_date_range(request) 
+            # fetch the data for the range
+            data = fetch.MSID(msid, tstart, tstop)
+            # Get the subset for the page
+            times = Time(data.times[idx0:length], format='unix').yday
+            values = data.vals[idx0:idx0+length]
+            # return to client
+            full_resolution_data  = list(zip(times, values))
+        except Exception as err:
             return HttpResponse(
-                json.dumps(
-                    {
-                        'message': self.message,
-                        'interval': interval,
-                        'start_yday': start_yday,
-                        'end_yday': end_yday,
-                        'class': 'FetchMinMeanMax',
-                        'source': 'raven.api.v1'
-                    }
-                ),
-                status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content_type='application/json'
-            )
-
-        return HttpResponse(json.dumps(
-                {
-                    'start_yday': start_yday,
-                    'end_yday': end_yday,
-                    'interval': interval,
-                    'data': stats
-                }
-            ),
-            status=status.HTTP_200_OK,
-            content_type='application/json'
-        )
+                            json.dumps({'error': err.args[0]}),
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            content_type='application/json'
+                   )
+        return HttpResponse(
+                        json.dumps({'data': full_resolution_data}),
+                        status=status.HTTP_200_OK,
+                        content_type='application/json'
+               )
 
 
 class FetchMnemonicDateRangeAPIView(APIView):
@@ -275,66 +270,6 @@ class FetchEngineeringTelemetryAPIView(APIView):
             status=status.HTTP_200_OK,
             content_type='application/json'
             )
-
-
-class FetchPlotDataAPIView(APIView):
-
-    """ APIView to to return data and meta-data for rendering plotly
-        plots.
-    """
-
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, format='json'):
-
-        mnemonic = request.GET.get('mnemonic', None)
-        fetch_url = request.build_absolute_uri(reverse('apiv1:fetch'))
-
-        tomorrow = datetime.datetime.now() + timedelta(days=1)
-        default_end_ydoy = f"{tomorrow.timetuple().tm_year}:{tomorrow.timetuple().tm_yday}:00:00:00.000"
-
-        start_of_ydoy = request.GET.get('start_of_range')
-
-        end_of_ydoy = request.GET.get(
-            'end_of_range',
-            default_end_ydoy
-        )
-
-        try:
-            response = requests.get(fetch_url, params={
-                    'mnemonic': mnemonic,
-                    'start_of_ydoy': start_of_ydoy,
-                    'end_of_ydoy': end_of_ydoy
-            })
-
-            plot_data = response.json()
-            plot_data[0]['type'] = 'scattergl'
-            plot_data[0]['mode'] = 'lines+markers'
-
-            plot_data[0]['line'] = {
-                    'shape': 'hv',
-                    'color': 'rgb(30, 110, 162)'
-            }
-
-            plot_data[0]['showlegend'] = True
-
-        except Exception as err:
-            return HttpResponse(
-                json.dumps({
-                        'message': err.args[0],
-                        'source': 'raven.api',
-                        'class': 'FetchPlotDataAPIView',
-                    },
-                ),
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                content_type='application/json')
-
-        return Response(
-            plot_data,
-            status=status.HTTP_200_OK,
-            content_type='application/json')
-
 
 class MnemonicStatisticsView(APIView):
 

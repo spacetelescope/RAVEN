@@ -8,11 +8,16 @@ from raven.core.api.v1 import views as core_views
 
 api_version = {
     'MAJOR_VERSION': 2,
-    'MINOR_VERSION': 1,
+    'MINOR_VERSION': 3,
     'PATCH_VERSION': 0,
 }
 
 urlpatterns = [
+    path(
+        'fetch/msid/pagination',
+        view=fetch_views.FetchFullResolutionData.as_view(),
+        name='full_resolution_data'
+    ),
     path(
         'archive/status/msid/count',
         view=archive_views.get_msid_count,
@@ -44,11 +49,6 @@ urlpatterns = [
         name='archive_size'
     ),
     path(
-        'fetch/plot',
-        view=fetch_views.FetchPlotDataAPIView.as_view(),
-        name='fetch_plot'
-    ),
-    path(
         'fetch/stats',
         view=fetch_views.MnemonicStatisticsView.as_view(),
         name='fetch_stats'
@@ -57,11 +57,6 @@ urlpatterns = [
         'fetch/date-range',
         view=fetch_views.FetchMnemonicDateRangeAPIView.as_view(),
         name='fetch_date_range'
-    ),
-    path(
-        'fetch/min-mean-max',
-        view=fetch_views.FetchMinMeanMax.as_view(),
-        name='fetch_min_mean_max'
     ),
     path(
         'fetch',

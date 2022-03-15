@@ -346,33 +346,38 @@ class MnemonicStatisticsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format='json'):
+        """ HTTP get method controller to handle fetch requests for msid stats
+        """
 
         try:
-            mnemonic = request.GET.get('mnemonic', None)
-            start_yday, end_yday = provide_default_date_range(request)
-            interval = request.GET.get('interval', '5min')
-
-            mmenmonic_stats = fetch.MSID(mnemonic, start_yday, end_yday, stat=interval)
+            msid = request.GET.get('msid', None)
+            tstart, tstop = provide_default_date_range(request)
+            interval = request.GET.get('interval')
+            if interval == '':
+                interval = '5min'
+            stats = fetch.MSID(msid, tstart, tstop, stat=interval)
 
             stats = {
-                'indexes': mmenmonic_stats.indexes.tolist(),
-                'times': Time(mmenmonic_stats.times.tolist(), format="cxcsec", scale='utc').iso.tolist(),
-                'values': mmenmonic_stats.vals.tolist(),
-                'mins': mmenmonic_stats.mins.tolist(),
-                'maxes': mmenmonic_stats.maxes.tolist(),
-                'means': mmenmonic_stats.maxes.tolist(),
-                'midvals':  mmenmonic_stats.midvals.tolist(),
+                'indexes': stats.indexes.tolist(),
+                'times': Time(stats.times.tolist(), format="unix", scale='utc').yday.tolist(),
+                'values': stats.vals.tolist(),
+                'mins': stats.mins.tolist(),
+                'maxes': stats.maxes.tolist(),
+                'means': stats.maxes.tolist(),
+                'midvals': stats.midvals.tolist(),
             }
 
-        except Exception as err:
+        except (Exception, ValueError) as err:
             return HttpResponse(
                             json.dumps({
-                                'error': err.args[0],
+                                'error': "Failed to fetch data for {}. Reason: {}".format(msid ,err.args[0]),
                                 'source': 'raven.api',
                                 'class': 'MnemonicStatisticsView',
+                                'tstart': tstart,
+                                'tstop': tstop
                             }),
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             content_type='application/json'
                    )
 
-        return HttpResponse(json.dumps({'stats' : stats}), status=status.HTTP_200_OK, content_type='application/json')
+        return HttpResponse(json.dumps({'stats' : stats, 'interval': interval, 'tstart': tstart, 'tstop': tstop}), status=status.HTTP_200_OK, content_type='application/json')

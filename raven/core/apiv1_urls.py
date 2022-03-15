@@ -8,7 +8,7 @@ from raven.core.api.v1 import views as core_views
 
 api_version = {
     'MAJOR_VERSION': 2,
-    'MINOR_VERSION': 0,
+    'MINOR_VERSION': 1,
     'PATCH_VERSION': 0,
 }
 

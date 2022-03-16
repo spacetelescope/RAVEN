@@ -62,8 +62,9 @@ class FetchFullResolutionData(APIView):
             records_total = len(data)
 
             # Get the subset for the page
-            times = Time(data.times[idx0:length], format='unix').yday
+            times = Time(data.times[idx0:idx0+length], format='unix').yday
             values = data.vals[idx0:idx0+length]
+            
             # return to client
             full_resolution_data  = list(zip(times, values))
             filtered_records = len(full_resolution_data)

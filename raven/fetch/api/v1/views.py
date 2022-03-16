@@ -53,7 +53,7 @@ class FetchFullResolutionData(APIView):
         try:
             msid = request.GET.get('msid')
             draw = request.GET.get('draw')
-            idx0 = int(request.GET.get('start'))
+            idx0 = int(request.GET.get('start', 0))
             length = int(request.GET.get('length'))
     
             tstart, tstop = self.default_date_range(request) 

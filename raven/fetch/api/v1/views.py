@@ -63,7 +63,7 @@ class FetchFullResolutionData(APIView):
 
             # Get the subset for the page
             times = Time(data.times[idx0:idx0+length], format='unix').yday
-            values = data.vals[idx0:idx0+length]
+            values = data.vals[idx0:idx0+length] 
 
             # return to client
             full_resolution_data  = list(zip(times, values))

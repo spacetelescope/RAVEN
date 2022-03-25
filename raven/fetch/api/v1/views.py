@@ -75,7 +75,7 @@ class FetchFullResolutionData(APIView):
 
             # return to client
             full_resolution_data  = list(zip(Time(tf.selection[idx0:idx0+length], format='jd').yday, vf.selection[idx0:idx0+length] ))
-            filtered_records = vf.length - len(full_resolution_data) 
+            filtered_records = vf.selection_length - len(full_resolution_data) 
 
         except Exception as err:
             return HttpResponse(
@@ -84,7 +84,7 @@ class FetchFullResolutionData(APIView):
                             content_type='application/json'
                    )
         return HttpResponse(
-                        json.dumps({'data': full_resolution_data, 'recordsTotal': vf.length, 'recordsFiltered': filtered_records}),
+                        json.dumps({'data': full_resolution_data, 'recordsTotal': vf.selection_length, 'recordsFiltered': filtered_records}),
                         status=status.HTTP_200_OK,
                         content_type='application/json'
                )

@@ -8,11 +8,16 @@ from raven.core.api.v1 import views as core_views
 
 api_version = {
     'MAJOR_VERSION': 2,
-    'MINOR_VERSION': 3,
-    'PATCH_VERSION': 6
+    'MINOR_VERSION': 4,
+    'PATCH_VERSION': 0
 }
 
 urlpatterns = [
+    path(
+        'fetch/msid/download',
+        view=fetch_views.FetchDownloadView.as_view(),
+        name='download'
+    ),
     path(
         'fetch/msid/pagination',
         view=fetch_views.FetchFullResolutionData.as_view(),

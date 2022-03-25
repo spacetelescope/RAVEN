@@ -1,11 +1,17 @@
+from ctypes import sizeof
+import os
+import sys
+import csv
 import json
 import datetime
 from datetime import timedelta
 
 import requests
 import numpy as np
+import pandas as pd
 
 from django.http import HttpResponse
+from django.http import StreamingHttpResponse
 from django.urls import reverse
 
 from rest_framework.authentication import TokenAuthentication
@@ -17,8 +23,10 @@ from rest_framework import status
 from astropy.time import Time
 
 from jeta.archive import fetch
+from jeta.archive.files import ValueFile, TimeFile
 
 from raven.core.util import provide_default_date_range
+
 
 class FetchFullResolutionData(APIView):
 
@@ -340,3 +348,96 @@ class MnemonicStatisticsView(APIView):
                    )
 
         return HttpResponse(json.dumps({'stats' : stats, 'interval': interval, 'tstart': tstart, 'tstop': tstop}), status=status.HTTP_200_OK, content_type='application/json')
+
+class Echo:
+    """An object that implements just the write method of the file-like
+    interface.
+    """
+    def write(self, value):
+        """Write the value by returning it, instead of storing in a buffer."""
+        return value
+
+class FetchDownloadView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def download(self, request, file_path):
+        header = False
+        if request.GET.get('interval') != 'full':
+            header = True
+            pd.DataFrame(self.get_data(request=request)).to_csv(file_path, index=False, header=header)
+            reader = None
+            with open(file_path, "r") as f:
+                reader = csv.reader(f, delimiter="\n")
+                rows = ([str(row).replace('[', '').replace(']', '').replace('\'', '').split(',') for row in reader])
+                pseudo_buffer = Echo()
+                writer = csv.writer(pseudo_buffer)
+                response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+                                                content_type="text/csv")
+                response['Content-Disposition'] = f'attachment; filename="{file_path}"'
+                # response['Content-Length'] = sys.getsizeof(rows)
+                return response
+        else:
+            data = self.get_data(request=request)
+            # rows = ([str(row).replace('[', '').replace(']', '').replace('\'', '').split(',') for row in data])
+            pseudo_buffer = Echo()
+            writer = csv.writer(pseudo_buffer)
+            response = StreamingHttpResponse((writer.writerow(str(row).replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace('\'', '').split(',')) for row in data),
+                                            content_type="text/csv")
+            response['Content-Disposition'] = f'attachment; filename="{file_path}"'
+            # response['Content-Length'] = (sizeof(float) + sizeof(int)) * len(data)
+            return response
+       
+       
+
+    def get_data(self, request):
+
+        self.tstart, self.tstop = provide_default_date_range(request)
+       
+        if self.interval == 'full':
+            
+            vf = ValueFile(self.msid)
+            tf = TimeFile(self.msid)
+            vf.get_file_data_range(Time(self.tstart, format='yday').jd, Time(self.tstop, format='yday').jd)
+            tf.get_file_data_range(Time(self.tstart, format='yday').jd, Time(self.tstop, format='yday').jd)
+
+            return list(zip(tf.selection, vf.selection))
+
+        if self.interval == '5min': 
+            self.data = fetch.MSID(self.msid, self.tstart, self.tstop, stat=self.interval)
+            stats = {
+                        'indexes': self.data.indexes.tolist(),
+                        'times': Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(),
+                        'values': self.data.vals.tolist(),
+                        'mins': self.data.mins.tolist(),
+                        'maxes': self.data.maxes.tolist(),
+                        'means': self.data.maxes.tolist(),
+                        'midvals': self.data.midvals.tolist(),
+                    }
+        if self.interval == 'daily':
+            self.data = fetch.MSID(self.msid, self.tstart, self.tstop, stat=self.interval)
+            stats = {
+                    'times': Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(),
+                    'mins': self.data.mins.tolist(),
+                    'maxes': self.data.maxes.tolist(),
+                    'means': self.data.maxes.tolist(),
+                    'stds': self.data.stds.tolist(),
+                    'p01s': self.data.p01s.tolist(),
+                    'p05s': self.data.p05s.tolist(),
+                    'p16s': self.data.p16s.tolist(),
+                    'p50s': self.data.p50s.tolist(),
+                    'p84s': self.data.p84s.tolist(),
+                    'p95s': self.data.p95s.tolist(),
+                    'p99s': self.data.p99s.tolist()
+                }
+        return stats
+            
+    def get(self, request):
+        self.msid = request.GET.get('msid', None)
+        self.interval = request.GET.get('interval')
+        if self.interval not in ['full', '5min', 'daily']:
+            self.interval = '5min'
+        file_path = '{}_{}_{}.csv'.format(str(self.msid).lower(), Time.now().unix, self.interval)
+
+        return self.download(request=request, file_path=file_path)

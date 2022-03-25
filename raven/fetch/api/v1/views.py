@@ -359,8 +359,8 @@ class Echo:
 
 class FetchDownloadView(APIView):
 
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def download(self, request, file_path):
         header = False

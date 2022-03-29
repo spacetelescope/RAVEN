@@ -1,4 +1,5 @@
 from ctypes import sizeof
+from io import StringIO
 import os
 import sys
 import csv
@@ -65,17 +66,22 @@ class FetchFullResolutionData(APIView):
             length = int(request.GET.get('length'))
     
             tstart, tstop = self.default_date_range(request) 
-            # fetch the data for the range
-            # data = fetch.MSID(msid, tstart, tstop)
 
             vf = ValueFile(msid)
             tf = TimeFile(msid)
-            vf.get_file_data_range(Time(tstart, format='yday').jd, Time(tstop, format='yday').jd)
-            tf.get_file_data_range(Time(tstart, format='yday').jd, Time(tstop, format='yday').jd)
+
+            vf.get_file_data_range(
+                Time(tstart, format='yday').jd, 
+                Time(tstop, format='yday').jd
+            )
+            tf.get_file_data_range(
+                Time(tstart, format='yday').jd, 
+                Time(tstop, format='yday').jd
+            )
 
             # return to client
-            full_resolution_data  = list(zip(Time(tf.selection[idx0:idx0+length], format='jd').yday, vf.selection[idx0:idx0+length] ))
-            filtered_records = vf.selection_length - len(full_resolution_data) 
+            data  = list(zip(Time(tf.selection[idx0:idx0+length], format='jd').yday, vf.selection[idx0:idx0+length]))
+            filtered_records = vf.selection_length - len(data) 
 
         except Exception as err:
             return HttpResponse(
@@ -84,7 +90,13 @@ class FetchFullResolutionData(APIView):
                             content_type='application/json'
                    )
         return HttpResponse(
-                        json.dumps({'data': full_resolution_data, 'recordsTotal': vf.selection_length, 'recordsFiltered': filtered_records}),
+                        json.dumps(
+                            {
+                                'data': data, 
+                                'recordsTotal': vf.selection_length, 
+                                'recordsFiltered': filtered_records,
+                                'draw': draw
+                            }),
                         status=status.HTTP_200_OK,
                         content_type='application/json'
                )
@@ -365,22 +377,18 @@ class FetchDownloadView(APIView):
     def download(self, request, file_path):
         header = False
         if request.GET.get('interval') != 'full':
-            header = True
-            pd.DataFrame(self.get_data(request=request)).to_csv(file_path, index=False, header=header)
-            reader = None
-            with open(file_path, "r") as f:
-                reader = csv.reader(f, delimiter="\n")
-                rows = ([str(row).replace('[', '').replace(']', '').replace('\'', '').split(',') for row in reader])
-                pseudo_buffer = Echo()
-                writer = csv.writer(pseudo_buffer)
-                response = StreamingHttpResponse((writer.writerow(row) for row in rows),
+            data_buffer = StringIO()
+            for line in self.get_data(request=request):
+                if line:
+                    print(line, file=data_buffer)
+
+            response = StreamingHttpResponse((row for row in data_buffer.getvalue()),
                                                 content_type="text/csv")
-                response['Content-Disposition'] = f'attachment; filename="{file_path}"'
+            response['Content-Disposition'] = f'attachment; filename="{file_path}"'
                 # response['Content-Length'] = sys.getsizeof(rows)
-                return response
+            return response
         else:
             data = self.get_data(request=request)
-            # rows = ([str(row).replace('[', '').replace(']', '').replace('\'', '').split(',') for row in data])
             pseudo_buffer = Echo()
             writer = csv.writer(pseudo_buffer)
             response = StreamingHttpResponse((writer.writerow(str(row).replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace('\'', '').split(',')) for row in data),
@@ -396,18 +404,12 @@ class FetchDownloadView(APIView):
         self.tstart, self.tstop = provide_default_date_range(request)
        
         if self.interval == 'full':
-            
-            vf = ValueFile(self.msid)
-            tf = TimeFile(self.msid)
-            vf.get_file_data_range(Time(self.tstart, format='yday').jd, Time(self.tstop, format='yday').jd)
-            tf.get_file_data_range(Time(self.tstart, format='yday').jd, Time(self.tstop, format='yday').jd)
-
-            return list(zip(tf.selection, vf.selection))
+            self.data = fetch.MSID(self.msid, self.tstart, self.tstop)
+            return list(zip(Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(), self.data.vals))
 
         if self.interval == '5min': 
             self.data = fetch.MSID(self.msid, self.tstart, self.tstop, stat=self.interval)
             stats = {
-                        'indexes': self.data.indexes.tolist(),
                         'times': Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(),
                         'values': self.data.vals.tolist(),
                         'mins': self.data.mins.tolist(),
@@ -437,7 +439,11 @@ class FetchDownloadView(APIView):
         self.msid = request.GET.get('msid', None)
         self.interval = request.GET.get('interval')
         if self.interval not in ['full', '5min', 'daily']:
-            self.interval = '5min'
+            return HttpResponse(
+                json.dumps({'error': f'{self.interval} is not a valid interval'}), 
+                status=400, 
+                content_type='application/json'
+            )
         file_path = '{}_{}_{}.csv'.format(str(self.msid).lower(), Time.now().unix, self.interval)
 
         return self.download(request=request, file_path=file_path)

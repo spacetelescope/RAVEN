@@ -375,64 +375,58 @@ class FetchDownloadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def download(self, request, file_path):
-        header = False
-        if request.GET.get('interval') != 'full':
-            data_buffer = StringIO()
-            for line in self.get_data(request=request):
-                if line:
-                    print(line, file=data_buffer)
+        data_buffer = StringIO()
+        for line in self.get_data(request=request):
+            # print(str(line).replace('(', '').replace(')', '').replace('\'', ''))
+            if line:
+                print(str(line).replace('(', '').replace(')', '').replace('\'', ''), file=data_buffer)
 
-            response = StreamingHttpResponse((row for row in data_buffer.getvalue()),
-                                                content_type="text/csv")
-            response['Content-Disposition'] = f'attachment; filename="{file_path}"'
-                # response['Content-Length'] = sys.getsizeof(rows)
-            return response
-        else:
-            data = self.get_data(request=request)
-            pseudo_buffer = Echo()
-            writer = csv.writer(pseudo_buffer)
-            response = StreamingHttpResponse((writer.writerow(str(row).replace('[', '').replace(']', '').replace('(', '').replace(')', '').replace('\'', '').split(',')) for row in data),
+        response = StreamingHttpResponse((row for row in data_buffer.getvalue()),
                                             content_type="text/csv")
-            response['Content-Disposition'] = f'attachment; filename="{file_path}"'
-            # response['Content-Length'] = (sizeof(float) + sizeof(int)) * len(data)
-            return response
+        response['Content-Disposition'] = f'attachment; filename="{file_path}"'
+        return response
        
-       
-
     def get_data(self, request):
 
         self.tstart, self.tstop = provide_default_date_range(request)
        
         if self.interval == 'full':
-            self.data = fetch.MSID(self.msid, self.tstart, self.tstop)
-            return list(zip(Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(), self.data.vals))
-
+            try:
+                self.data = fetch.MSID(self.msid, self.tstart, self.tstop)
+                return list(zip(['times'] + Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(), ['values'] + self.data.vals.tolist()))
+            except Exception as err:
+                # TODO: Raise exception and return error message as json
+                print(err)
         if self.interval == '5min': 
             self.data = fetch.MSID(self.msid, self.tstart, self.tstop, stat=self.interval)
-            stats = {
-                        'times': Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(),
-                        'values': self.data.vals.tolist(),
-                        'mins': self.data.mins.tolist(),
-                        'maxes': self.data.maxes.tolist(),
-                        'means': self.data.maxes.tolist(),
-                        'midvals': self.data.midvals.tolist(),
-                    }
+            stats = list(zip(
+                            ['times'] + Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(),
+                            ['values'] + self.data.vals.tolist(),
+                            ['mins'] + self.data.mins.tolist(),
+                            ['maxes'] + self.data.maxes.tolist(),
+                            ['means'] + self.data.maxes.tolist(),
+                            ['midvals'] + self.data.midvals.tolist()
+                    ))
         if self.interval == 'daily':
             self.data = fetch.MSID(self.msid, self.tstart, self.tstop, stat=self.interval)
-            stats = {
-                    'times': Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(),
-                    'mins': self.data.mins.tolist(),
-                    'maxes': self.data.maxes.tolist(),
-                    'means': self.data.maxes.tolist(),
-                    'stds': self.data.stds.tolist(),
-                    'p01s': self.data.p01s.tolist(),
-                    'p05s': self.data.p05s.tolist(),
-                    'p16s': self.data.p16s.tolist(),
-                    'p50s': self.data.p50s.tolist(),
-                    'p84s': self.data.p84s.tolist(),
-                    'p95s': self.data.p95s.tolist(),
-                    'p99s': self.data.p99s.tolist()
-                }
+            try:
+                stats = list(zip(
+                            ['times'] + Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(),
+                            ['mins'] + self.data.mins.tolist(),
+                            ['maxes'] + self.data.maxes.tolist(),
+                            ['means'] + self.data.maxes.tolist(),
+                            ['stds'] + self.data.stds.tolist(),
+                            ['p01s'] + self.data.p01s.tolist(),
+                            ['p05s'] + self.data.p05s.tolist(),
+                            ['p16s'] + self.data.p16s.tolist(),
+                            ['p50s'] + self.data.p50s.tolist(),
+                            ['p84s'] + self.data.p84s.tolist(),
+                            ['p95s'] + self.data.p95s.tolist(),
+                            ['p99s'] + self.data.p99s.tolist()
+                    ))
+            except Exception as err:
+                # TODO: Raise exception and return error message as json
+                print(err)
         return stats
             
     def get(self, request):

@@ -376,22 +376,25 @@ class FetchDownloadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def download(self, request, file_path):
-        if self.interval != 'full':
-            data_buffer = StringIO()
-            for line in self.get_data(request=request):
-                # print(str(line).replace('(', '').replace(')', '').replace('\'', ''))
-                if line:
-                    print(str(line).replace('(', '').replace(')', '').replace('\'', ''), file=data_buffer)
+        try:
+            if self.interval != 'full':
+                data_buffer = StringIO()
+                for line in self.get_data(request=request):
+                    # print(str(line).replace('(', '').replace(')', '').replace('\'', ''))
+                    if line:
+                        print(str(line).replace('(', '').replace(')', '').replace('\'', ''), file=data_buffer)
 
-            response = StreamingHttpResponse((row for row in data_buffer.getvalue()),
-                                                content_type="text/csv")
-            response['Content-Disposition'] = f'attachment; filename="{file_path}"'
-            return response
-        else:
-            response = StreamingHttpResponse((Echo.write(str(line).replace('(', '').replace(')', '').replace('\'', '')) for line in self.get_data(request=request)),
-                                                content_type="text/csv")
-            response['Content-Disposition'] = f'attachment; filename="{file_path}"'
-            return response
+                response = StreamingHttpResponse((row for row in data_buffer.getvalue()),
+                                                    content_type="text/csv")
+                response['Content-Disposition'] = f'attachment; filename="{file_path}"'
+                return response
+            else:
+                response = StreamingHttpResponse((Echo.write(str(line).replace('(', '').replace(')', '').replace('\'', '')) for line in self.get_data(request=request)),
+                                                    content_type="text/csv")
+                response['Content-Disposition'] = f'attachment; filename="{file_path}"'
+                return response
+        except Exception as err:
+            raise err
        
     def get_data(self, request):
 
@@ -400,14 +403,15 @@ class FetchDownloadView(APIView):
         if self.interval == 'full':
             try:
                 self.data = fetch.MSID(self.msid, self.tstart, self.tstop)
-                full = list(zip(
-                        ['times'] + Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(), 
-                        ['values'] + self.data.vals.tolist()
-                    ))
-                return full
+                if len(self.data) < 1_048_576:
+                    full = list(zip(
+                            ['times'] + Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(), 
+                            ['values'] + self.data.vals.tolist()
+                        ))
+                    return full
+                raise ValueError('Total fetch exceeds max threshold of 1,048,576.')
             except Exception as err:
-                # TODO: Raise exception and return error message as json
-                print(err)
+               raise err
         if self.interval == '5min': 
             self.data = fetch.MSID(self.msid, self.tstart, self.tstop, stat=self.interval)
             stats = list(zip(
@@ -450,5 +454,10 @@ class FetchDownloadView(APIView):
                 content_type='application/json'
             )
         file_path = '{}_{}_{}.csv'.format(str(self.msid).lower(), Time.now().unix, self.interval)
-
-        return self.download(request=request, file_path=file_path)
+        try:
+            response = self.download(request=request, file_path=file_path)
+            return response
+        except Exception as err:
+            return HttpResponse(json.dumps({
+                'error': err.args[0],
+            }), status=500, content_type='application/json')

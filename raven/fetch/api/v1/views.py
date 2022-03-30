@@ -365,9 +365,10 @@ class Echo:
     """An object that implements just the write method of the file-like
     interface.
     """
-    def write(self, value):
+    @staticmethod
+    def write(value):
         """Write the value by returning it, instead of storing in a buffer."""
-        return value
+        return value + '\n'
 
 class FetchDownloadView(APIView):
 
@@ -375,16 +376,22 @@ class FetchDownloadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def download(self, request, file_path):
-        data_buffer = StringIO()
-        for line in self.get_data(request=request):
-            # print(str(line).replace('(', '').replace(')', '').replace('\'', ''))
-            if line:
-                print(str(line).replace('(', '').replace(')', '').replace('\'', ''), file=data_buffer)
+        if self.interval != 'full':
+            data_buffer = StringIO()
+            for line in self.get_data(request=request):
+                # print(str(line).replace('(', '').replace(')', '').replace('\'', ''))
+                if line:
+                    print(str(line).replace('(', '').replace(')', '').replace('\'', ''), file=data_buffer)
 
-        response = StreamingHttpResponse((row for row in data_buffer.getvalue()),
-                                            content_type="text/csv")
-        response['Content-Disposition'] = f'attachment; filename="{file_path}"'
-        return response
+            response = StreamingHttpResponse((row for row in data_buffer.getvalue()),
+                                                content_type="text/csv")
+            response['Content-Disposition'] = f'attachment; filename="{file_path}"'
+            return response
+        else:
+            response = StreamingHttpResponse((Echo.write(str(line).replace('(', '').replace(')', '').replace('\'', '')) for line in self.get_data(request=request)),
+                                                content_type="text/csv")
+            response['Content-Disposition'] = f'attachment; filename="{file_path}"'
+            return response
        
     def get_data(self, request):
 
@@ -393,7 +400,11 @@ class FetchDownloadView(APIView):
         if self.interval == 'full':
             try:
                 self.data = fetch.MSID(self.msid, self.tstart, self.tstop)
-                return list(zip(['times'] + Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(), ['values'] + self.data.vals.tolist()))
+                full = list(zip(
+                        ['times'] + Time(self.data.times.tolist(), format="unix", scale='utc').yday.tolist(), 
+                        ['values'] + self.data.vals.tolist()
+                    ))
+                return full
             except Exception as err:
                 # TODO: Raise exception and return error message as json
                 print(err)

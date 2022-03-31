@@ -377,22 +377,10 @@ class FetchDownloadView(APIView):
 
     def download(self, request, file_path):
         try:
-            if self.interval != 'full':
-                data_buffer = StringIO()
-                for line in self.get_data(request=request):
-                    # print(str(line).replace('(', '').replace(')', '').replace('\'', ''))
-                    if line:
-                        print(str(line).replace('(', '').replace(')', '').replace('\'', ''), file=data_buffer)
-
-                response = StreamingHttpResponse((row for row in data_buffer.getvalue()),
-                                                    content_type="text/csv")
-                response['Content-Disposition'] = f'attachment; filename="{file_path}"'
-                return response
-            else:
-                response = StreamingHttpResponse((Echo.write(str(line).replace('(', '').replace(')', '').replace('\'', '')) for line in self.get_data(request=request)),
-                                                    content_type="text/csv")
-                response['Content-Disposition'] = f'attachment; filename="{file_path}"'
-                return response
+            response = StreamingHttpResponse((Echo.write(str(line).replace('(', '').replace(')', '').replace('\'', '')) for line in self.get_data(request=request)),
+                                                content_type="text/csv")
+            response['Content-Disposition'] = f'attachment; filename="{file_path}"'
+            return response
         except Exception as err:
             raise err
        

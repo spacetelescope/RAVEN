@@ -368,7 +368,7 @@ class Echo:
     @staticmethod
     def write(value):
         """Write the value by returning it, instead of storing in a buffer."""
-        return value + '\n'
+        return str(value).replace('(', '').replace(')', '').replace('\'', '') + '\n'
 
 class FetchDownloadView(APIView):
 
@@ -377,7 +377,7 @@ class FetchDownloadView(APIView):
 
     def download(self, request, file_path):
         try:
-            response = StreamingHttpResponse((Echo.write(str(line).replace('(', '').replace(')', '').replace('\'', '')) for line in self.get_data(request=request)),
+            response = StreamingHttpResponse((Echo.write(line) for line in self.get_data(request=request)),
                                                 content_type="text/csv")
             response['Content-Disposition'] = f'attachment; filename="{file_path}"'
             return response
